@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace 鏡面反射光除去処理
+namespace 反射光除去処理
 {
     static class Program
     {

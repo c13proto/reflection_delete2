@@ -4,96 +4,99 @@ using System.Linq;
 using System.Text;
 using OpenCvSharp;
 
-namespace 鏡面反射光除去処理
+namespace 反射光除去処理
 {
     class manualCV
     {
-        public void 鏡面反射光除去(Mat[] images, ref Mat DST)
+        public void 自作反射光除去(Mat[] images, ref Mat DST)
         {
             int width = images[0].Width;
             int height = images[0].Height;
-            var indexer = DST.GetGenericIndexer<Vec3b>();
+            //var indexer = DST.GetGenericIndexer<Vec3b>();
 
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
                 {//medianX,Y SG完成
-                    Vec3b color = indexer[y, x];
+                    Vec3b color = DST.Get<Vec3b>(y, x);//indexer[y, x];
                     double[] vals = { 0, 0, 0, 0 };
                     for (int num = 0; num < 4; num++) vals[num] = images[num].At<Vec3b>(y,x).Item0;
                     Array.Sort(vals);//並び替えを行う．min=vals[0]
                     color.Item0 =(byte)( (vals[0] + vals[1] + vals[2]) / 3.0);
-                    indexer[y, x] = color;
+                    DST.Set<Vec3b>(y, x, color);
+                    //indexer[y, x] = color;
 
-                    //for (int num = 0; num < 4; num++) vals[num] = Cv.Get2D(images[num], y, x).Val0;
-                    //Array.Sort(vals);//並び替えを行う．min=vals[0]
-
-                    //CvScalar cs = Cv.Get2D(DST, y, x);
-                    //double ave = (vals[0]+vals[1] + vals[2]) / 3.0;
-                    //cs.Val0 = ave;
-                    ////if (Math.Abs(ave - vals[3]) <= 35) cs.Val0 = vals[3];//どれも同じくらいだったら一番明るいのをとる
-                    //Cv.Set2D(DST, y, x, cs);
                 }
-            //for (int num = 0; num < 4; num++)images[num].Dispose();元のものに影響するっぽい
+
+        }
+        public void 吉岡反射光除去処理(Mat[] images, ref Mat DST,int th_l,int th_h)
+        {
+            int width = images[0].Width;
+            int height = images[0].Height;
+            //var indexer = DST.GetGenericIndexer<Vec3b>();
+
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                {//medianX,Y SG完成
+                    Vec3b color = DST.Get<Vec3b>(y, x);//indexer[y, x];
+                    double[] vals = { 0, 0, 0, 0 };
+                    for (int num = 0; num < 4; num++) vals[num] = images[num].At<Vec3b>(y, x).Item0;
+                    Array.Sort(vals);//並び替えを行う．min=vals[0]
+                    for (int i = 1; i < 3;i++ ) if (vals[i] < th_l || vals[i]>th_h) vals[i] = 255;                    
+                    color.Item0 = (byte)((vals[1] + vals[2]) / 2.0);
+                    DST.Set<Vec3b>(y, x, color);
+                    //indexer[y, x] = color;
+
+                }
 
         }
         public void コントラスト調整_シグモイド(ref Mat src, double 倍率)
         {
             int width = src.Width;
             int height = src.Height;
-            var indexer = src.GetGenericIndexer<Vec3b>();
+            //var indexer = src.GetGenericIndexer<Vec3b>();
 
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
                 {
-                    Vec3b color = indexer[y, x];
+                    Vec3b color = src.Get<Vec3b>(y, x); //indexer[y, x];
                     color.Item0 = (byte)(255.0 / (1 + Math.Exp(-倍率 * (color.Item0 - 128) / 255)));
-                    indexer[y, x] = color;
-                    //CvScalar cs = Cv.Get2D(src, y, x);
-                    //cs.Val0 = 255.0 / (1 + Math.Exp(-倍率 * (cs.Val0 - 128) / 255)); 
-                    //Cv.Set2D(src, y, x, cs);
+                    src.Set<Vec3b>(y, x, color);//indexer[y, x] = color;
+
                 }
-            //for (int num = 0; num < 4; num++)images[num].Dispose();元のものに影響するっぽい
 
         }
         public void コントラスト調整(ref Mat src, double 倍率)
         {
             int width = src.Width;
             int height = src.Height;
-            var indexer = src.GetGenericIndexer<Vec3b>();
+            //var indexer = src.GetGenericIndexer<Vec3b>();
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
                 {
-                    Vec3b color = indexer[y, x];
+                    Vec3b color = src.Get<Vec3b>(y, x);//indexer[y, x];
                     double val = color.Item0 * 倍率;
                     if (val > 255) color.Item0 = 255;
                     else if (val < 0) color.Item0 = 0;
                     else color.Item0 = (byte)val;
-                    indexer[y, x] = color;
-                    //CvScalar cs = Cv.Get2D(src, y, x);
-                    //val = cs.Val0 * 倍率;
-                    //if (val > 255) cs.Val0 = 255;
-                    //else cs.Val0 = val;
-                    //Cv.Set2D(src, y, x, cs);
+                    src.Set<Vec3b>(y, x, color);//indexer[y, x] = color;
                 }
-            //for (int num = 0; num < 4; num++)images[num].Dispose();元のものに影響するっぽい
 
         }
         public void Median(Mat[] images, ref Mat DST)
         {
             int width = images[0].Width;
             int height = images[0].Height;
-            var indexer = DST.GetGenericIndexer<Vec3b>();
+            //var indexer = DST.GetGenericIndexer<Vec3b>();
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
                 {//medianX,Y SG完成
                     double[] vals = { 0, 0, 0, 0 };
-                    Vec3b color = indexer[y, x];
+                    Vec3b color = DST.Get<Vec3b>(y, x);//indexer[y, x];
                     for (int num = 0; num < 4; num++) vals[num] = images[num].At<Vec3b>(y, x).Item0;
                     Array.Sort(vals);//並び替えを行う．min=vals[0]
                     color.Item0 = (byte)(( vals[1] + vals[2]) / 2);
-                    indexer[y, x] = color;
+                    DST.Set<Vec3b>(y, x, color);//indexer[y, x] = color;
                 }
-            //for (int num = 0; num < 4; num++)images[num].Dispose();元のものに影響するっぽい
 
         }
         public void brightness(ref Mat img, double 目標)
@@ -103,8 +106,8 @@ namespace 鏡面反射光除去処理
             int height = img.Height;
             int center_x = width /5;
             int center_y = height /5;
-            var indexer = img.GetGenericIndexer<Vec3b>();
-
+            //var indexer = img.GetGenericIndexer<Vec3b>();
+            
             double[] vals= new double[9];
             double average=0;
             double diff = 0;
@@ -120,36 +123,28 @@ namespace 鏡面反射光除去処理
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
                 {
-                    Vec3b color = indexer[y, x];
+                    Vec3b color = img.Get<Vec3b>(y, x);//indexer[y, x];
                     double val = color.Item0 + diff;
                     if (val > 255) color.Item0 = 255;
                     else if(val<0) color.Item0 =0;
                     else color.Item0 = (byte)val;
-                    indexer[y, x] = color;
-                    //CvScalar cs = Cv.Get2D(img, y, x);
-                    //double val= cs.Val0 + diff;
-                    //if (val > 255) cs.Val0 = 255;
-                    //else cs.Val0 = val;
-                    //Cv.Set2D(img, y, x, cs);
+                    img.Set<Vec3b>(y, x, color);//indexer[y, x] = color;
                 }
         }
         public void infilterX(ref Mat DST,Mat SRC)
         {
             int width = SRC.Width;
             int height = SRC.Height;
-            var indexer = DST.GetGenericIndexer<Vec3b>();
+            //var indexer = DST.GetGenericIndexer<Vec3b>();
             for (int x = 0; x < width - 1; x++)
                 for (int y = 0; y < height; y++)
                 {
-                    Vec3b color = indexer[y, x];
+                    Vec3b color = DST.Get<Vec3b>(y, x);//indexer[y, x];
                     double val=(SRC.At<Vec3b>(y, x + 1).Item0 - SRC.At<Vec3b>(y, x).Item0);
                     if (val > 255) color.Item0 = 255;
                     else if (val < 0) color.Item0 = 0;
                     else color.Item0 = (byte)val;
-                    indexer[y, x] = color;
-                    //CvScalar cs;
-                    //cs = Cv.Get2D(SRC, y, x + 1) - Cv.Get2D(SRC, y, x);
-                    //Cv.Set2D(DST, y, x, cs);
+                    DST.Set<Vec3b>(y, x, color);//indexer[y, x] = color;
                 }
             //SRC.Dispose();
         }
@@ -157,21 +152,17 @@ namespace 鏡面反射光除去処理
         {
             int width = SRC.Width;
             int height = SRC.Height;
-            var indexer = DST.GetGenericIndexer<Vec3b>();
+            //var indexer = DST.GetGenericIndexer<Vec3b>();
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height - 1; y++)
                 {
-                    Vec3b color = indexer[y, x];
+                    Vec3b color = DST.Get<Vec3b>(y, x);//indexer[y, x];
                     double val = (SRC.At<Vec3b>(y+1, x).Item0 - SRC.At<Vec3b>(y, x).Item0);
                     if (val > 255) color.Item0 = 255;
                     else if (val < 0) color.Item0 = 0;
                     else color.Item0 = (byte)val;
-                    indexer[y, x] = color;
-                    //CvScalar cs;
-                    //cs = Cv.Get2D(SRC, y + 1, x) - Cv.Get2D(SRC, y, x);
-                    //Cv.Set2D(DST, y, x, cs);
+                    DST.Set<Vec3b>(y, x, color);//indexer[y, x] = color;
                 }
-            //SRC.Dispose();
         }
 
 

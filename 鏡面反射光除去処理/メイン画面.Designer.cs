@@ -1,4 +1,4 @@
-﻿namespace 鏡面反射光除去処理
+﻿namespace　反射光除去処理
 {
     partial class メイン画面
     {
@@ -209,20 +209,20 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(52, 213);
+            this.label1.Location = new System.Drawing.Point(43, 213);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(31, 12);
+            this.label1.Size = new System.Drawing.Size(49, 12);
             this.label1.TabIndex = 16;
-            this.label1.Text = "Gaus";
+            this.label1.Text = "th_l/Size";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(52, 238);
+            this.label2.Location = new System.Drawing.Point(44, 235);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(36, 12);
+            this.label2.Size = new System.Drawing.Size(43, 12);
             this.label2.TabIndex = 17;
-            this.label2.Text = "Bright";
+            this.label2.Text = "th_h/Br";
             // 
             // trackBar_cont
             // 
@@ -307,12 +307,12 @@
         private System.Windows.Forms.Button button_自作;
         private System.Windows.Forms.Button button_保存;
         private System.Windows.Forms.TextBox textBox_Gaus;
-        private System.Windows.Forms.TextBox textBox_Bright;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TrackBar trackBar_cont;
         private System.Windows.Forms.TextBox textBox_Cont;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox textBox_Bright;
     }
 }
 
