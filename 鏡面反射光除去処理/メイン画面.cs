@@ -35,15 +35,15 @@ namespace 反射光除去処理
             {
                 int width = 入力画像[0].Width;
                 int height = 入力画像[0].Height;
-                //new OpenCvSharp.Mat(100, 120, MatType.CV_8UC3);
-                //new Mat("hoge.bmp", ImreadMode.Color);
-                出力画像 = new OpenCvSharp.Mat(height,width,MatType.CV_8UC1);//Cv.CreateImage(new CvSize(width, height), BitDepth.U8, 1);//メディアンのみ
+                出力画像 = new OpenCvSharp.Mat(height,width,MatType.CV_8UC1);
                 manualCV mCV = new manualCV();//メディアンフィルタかけるためのクラス
                 mCV.自作反射光除去(入力画像, ref 出力画像);
                 if (!(int.Parse(textBox_Gaus.Text) == 0)) Cv2.GaussianBlur(出力画像, 出力画像, new OpenCvSharp.Size(int.Parse(textBox_Gaus.Text), int.Parse(textBox_Gaus.Text)),0,0,BorderTypes.Default);//ガウシアンフィルタ
+
                 mCV.コントラスト調整(ref 出力画像, double.Parse(textBox_Cont.Text));
                 //mCV.コントラスト調整_シグモイド(ref 出力画像, double.Parse(textBox_Cont.Text));
-                mCV.brightness(ref 出力画像, double.Parse(textBox_Bright.Text));
+                if (textBox_Bright.Text != "0") mCV.brightness(ref 出力画像, double.Parse(textBox_Bright.Text));
+
                 pictureBoxIpl1.ImageIpl = 出力画像;
             }
             else System.Diagnostics.Debug.WriteLine("no 4 images");
