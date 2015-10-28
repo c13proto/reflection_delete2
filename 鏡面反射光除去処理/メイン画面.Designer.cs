@@ -243,6 +243,7 @@
             this.textBox_Cont.Size = new System.Drawing.Size(28, 19);
             this.textBox_Cont.TabIndex = 19;
             this.textBox_Cont.Text = "4.0";
+            this.textBox_Cont.TextChanged += new System.EventHandler(this.TextChanged_cont);
             // 
             // label3
             // 

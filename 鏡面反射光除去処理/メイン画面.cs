@@ -262,12 +262,13 @@ namespace 反射光除去処理
             自作プロセス実行();
         }
 
-        private void TectChanged_cont(object sender, EventArgs e)
+
+        private void TextChanged_cont(object sender, EventArgs e)
         {
             double isnumber;
             if (double.TryParse(textBox_Cont.Text, out isnumber))
-                if (isnumber >= trackBar_cont.Minimum*10 && isnumber <= trackBar_cont.Maximum*10)
-                    trackBar_cont.Value = (int)isnumber*10;
+                if (isnumber * 10 >= trackBar_cont.Minimum && isnumber * 10 <= trackBar_cont.Maximum)
+                    trackBar_cont.Value = (int)(isnumber * 10);
         }
 
 
