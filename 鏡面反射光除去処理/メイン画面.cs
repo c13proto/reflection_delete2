@@ -12,17 +12,17 @@ namespace 反射光除去処理
 {
     public partial class メイン画面 : Form
     {
-        public static Mat[] 入力画像= new Mat[4];
-        public static Mat[] Gx = new Mat[4];
-        public static Mat[] Gy = new Mat[4];
-        public static Mat SGx;
-        public static Mat SGy;
-        public static Mat Gxx;
-        public static Mat Gyy;
+        Mat[] 入力画像= new Mat[4];
+        Mat[] Gx = new Mat[4];
+        Mat[] Gy = new Mat[4];
+        Mat SGx;
+        Mat SGy;
+        Mat Gxx;
+        Mat Gyy;
 
-        public static Mat 出力画像;
-        public static Boolean is4Image = false;
-
+        Mat 出力画像;
+        Boolean is4Image = false;
+        manualCV mCV = new manualCV();
 
         public メイン画面()
         {
@@ -36,7 +36,6 @@ namespace 反射光除去処理
                 int width = 入力画像[0].Width;
                 int height = 入力画像[0].Height;
                 出力画像 = new OpenCvSharp.Mat(height,width,MatType.CV_8UC1);
-                manualCV mCV = new manualCV();//メディアンフィルタかけるためのクラス
                 mCV.自作反射光除去(入力画像, ref 出力画像);
                 if (!(int.Parse(textBox_Gaus.Text) == 0)) Cv2.GaussianBlur(出力画像, 出力画像, new OpenCvSharp.Size(int.Parse(textBox_Gaus.Text), int.Parse(textBox_Gaus.Text)),0,0,BorderTypes.Default);//ガウシアンフィルタ
 
@@ -65,7 +64,6 @@ namespace 反射光除去処理
 
                 SGx = new OpenCvSharp.Mat(height,width, MatType.CV_8UC1);
                 SGy = new OpenCvSharp.Mat(height, width, MatType.CV_8UC1);
-                manualCV mCV = new manualCV();//コサイン変換とメディアンフィルタかけるためのクラス
 
                 for (int num = 0; num < 4; num++)
                 {
@@ -91,22 +89,30 @@ namespace 反射光除去処理
 
                 //SP作成（仮の出力画像）
                 Mat SP = new OpenCvSharp.Mat(height,width, MatType.CV_8UC1);
-                //var indexer_sp = SP.GetGenericIndexer<Vec3b>();
+                var indexer_sp = new MatOfByte3(SP).GetIndexer();
+                var indexer_Gxx= new MatOfByte3(Gxx).GetIndexer();
+                var indexer_Gyy = new MatOfByte3(Gyy).GetIndexer();
                 for (int x = 0; x < width; x++)
                     for (int y = 0; y < height; y++)
                     {
-                        Vec3b color = SP.Get<Vec3b>(y, x);//indexer_sp[y, x];
-                        double val = (Gxx.At<Vec3b>(y, x).Item0+Gyy.At<Vec3b>(y, x).Item0);
+                        Vec3b color = indexer_sp[y, x];
+                        double val = indexer_Gxx[y, x].Item0+ indexer_Gyy[y, x].Item0;
                         if (val > 255) color.Item0 = 255;
                         else if (val < 0) color.Item0 = 0;
                         else color.Item0 = (byte)val;
-                        SP.Set<Vec3b>(y, x, color);//indexer_sp[y, x] = color;
+                        indexer_sp[y, x] = color;
  
                     }
+                indexer_sp  =null;
+                indexer_Gxx =null;
+                indexer_Gyy = null;
+                
+
+
                 Mat DCT_dst = new OpenCvSharp.Mat(height, width, MatType.CV_8UC1);
-                //mCV.CvDct(ref DCT_dst, ref SP, 1024);//第3引数使われてない件
+                mCV.CvDct(ref DCT_dst,SP, 1024);//第3引数使われてない件
                 //DCT_dst = SP.Clone();
-                mCV.吉岡反射光除去処理(入力画像, ref DCT_dst,int.Parse(textBox_Gaus.Text),int.Parse(textBox_Bright.Text));
+                //mCV.吉岡反射光除去処理(入力画像, ref DCT_dst,int.Parse(textBox_Gaus.Text),int.Parse(textBox_Bright.Text));
                 出力画像=DCT_dst.Clone();
                 
             }
